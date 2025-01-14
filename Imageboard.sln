@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35027.167
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Imageboard", "Imageboard\Imageboard.csproj", "{B6FB443A-D14D-4248-B117-947FB8C4566C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B6FB443A-D14D-4248-B117-947FB8C4566C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6FB443A-D14D-4248-B117-947FB8C4566C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6FB443A-D14D-4248-B117-947FB8C4566C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6FB443A-D14D-4248-B117-947FB8C4566C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2DA12700-D899-4B88-9A04-9EED4A5B4444}
+	EndGlobalSection
+EndGlobal
