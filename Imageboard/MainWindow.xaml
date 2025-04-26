@@ -26,7 +26,7 @@
                 </ListView>
             </StackPanel>
         </ScrollViewer>
-        <ScrollViewer x:Name="ya_ebal" Margin="260,0,0,100" Width="720" MaxWidth="720"
+        <ScrollViewer x:Name="SV" Margin="260,0,0,100" Width="720" MaxWidth="720"
         VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
             <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Background="#223345">
                 <ListView x:Name="chat" Background="#223345">
@@ -46,6 +46,6 @@
         <TextBlock x:Name="UserTB" HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="NoWrap" Foreground="#6995c5" Text="{Binding name}" Background="Transparent" VerticalAlignment="Top" Width="220" Height="50"/>
         <TextBox x:Name="SendBox" HorizontalAlignment="Left" Margin="270,469,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="645" Height="85" Background="#223345" Foreground="Wheat"/>
         <Button Content="Add Server" HorizontalAlignment="Left" Margin="20,489,0,0" VerticalAlignment="Top" Height="65" Width="230" Click="AddServer" Background="Wheat"/>
-        <Button Content="Send" HorizontalAlignment="Left" Margin="920,469,0,0" VerticalAlignment="Top" Height="85" Width="60" Click="Button_Click" Background="Wheat"/>
+        <Button Content="Send" HorizontalAlignment="Left" Margin="920,469,0,0" VerticalAlignment="Top" Height="85" Width="60" Click="SendButtonClick" Background="Wheat"/>
     </Grid>
 </Window>

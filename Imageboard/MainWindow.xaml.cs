@@ -8,21 +8,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Newtonsoft.Json;
-using System.Windows.Markup;
-using static System.Net.Mime.MediaTypeNames;
-using System.IO.Pipes;
 using System.IO;
 
 namespace Imageboard
 {
+
+    
+
     public class Request
     {
         public int operation { get; set; }
@@ -34,28 +27,52 @@ namespace Imageboard
         public int id { get; set; }
     }
 
-    
+    public class FileManager
+    {
+        private string FileName;
+        public FileManager(string fileName) {
+            this.FileName = fileName;
+        }
+        public ObservableCollection<ServerList> InitServerList() {
+            ObservableCollection<ServerList> servers = new ObservableCollection<ServerList>();
+            foreach (var line in File.ReadLines(this.FileName))
+            {
+                servers.Add(new ServerList { IP = line });
+            }
+            return servers;
+        }
+    }    
     public partial class MainWindow : Window
     {
+        const string DEFAULT_IP = "localhost";
+        const string ERROR = "[ERROR]";
+        const string DEFAULT_QUEUE = "1";
+        const string DEFAULT_MAX_QUEUE = "100";
+
+        FileManager serverFile;
         Socket connection = null;
         ObservableCollection<ChatMessage> messages = new ObservableCollection<ChatMessage>();
-        ObservableCollection<ServerList> servers = new ObservableCollection<ServerList>();
-        string ip = "localhost";
-        string username = "[ERROR]";
-        string queue = "1";
-        string maxQueue = "100";
+        ObservableCollection<ServerList> servers;
+        string ip = DEFAULT_IP;
+        string username = ERROR;
+        string queue = DEFAULT_QUEUE;
+        string maxQueue = DEFAULT_MAX_QUEUE;
+
+        public string Ip { get => ip; set => ip = value; }
+        public string Username { get => username; set => username = value; }
+        public string Queue { get => queue; set => queue = value; }
+        public string MaxQueue { get => maxQueue; set => maxQueue = value; }
+
         public MainWindow()
         {
             InitializeComponent();
 
-            foreach (var line in File.ReadLines("servers.txt"))
-            {
-                servers.Add(new ServerList { IP = line });
-            }
+            serverFile = new FileManager("servers.txt");
+            servers = serverFile.InitServerList();
 
             chat.ItemsSource = messages;
-            UserTB.Text = $"Host: {ip} \nLogged in as {username}\nQueue {queue}/{maxQueue}";
-            ya_ebal.ScrollChanged += OnScrollChanged;
+            UserTB.Text = $"Host: {Ip} \nLogged in as {Username}\nQueue {Queue}/{MaxQueue}";
+            SV.ScrollChanged += OnScrollChanged;
 
             server_list.ItemsSource = servers;
 
@@ -73,7 +90,7 @@ namespace Imageboard
             }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void SendButtonClick(object sender, RoutedEventArgs e)
         {
             SendBox.Focus();
             string Text = SendBox.Text;
@@ -88,42 +105,20 @@ namespace Imageboard
                         case "connect":
                             if (command.Length > 1)
                             {
-                                messages.Add(new ChatMessage { Id = -1, User = "SYSTEM", Message = $"Connecting to {command[1]}" });
-                                string[] host = command[1].Split(':');
-                                connection = ExecuteClient(host[0], Convert.ToInt32(host[1]));
-                                if (connection != null)
-                                {
-                                    UserTB.Text = $"Host: {host[0]}:{host[1]} \nLog in using /login\nQueue {queue}/{maxQueue}";
-                                    messages.Add(new ChatMessage { Id = -1, User = "SYSTEM", Message = $"Connected to {command[1]}" });
-                                    messages.Add(new ChatMessage { Id = -1, User = "SYSTEM", Message = $"Login using /login [USERNAME] [PASSWORD]" });
-
-                                    _ = ReceiveMessagesAsync(connection);
-                                    _ = SyncMessages(connection);
-                                }
-                                else
-                                {
-                                    messages.Add(new ChatMessage { Id = -1, User = "SYSTEM", Message = $"Failed to connect to {command[1]}" });
-                                }
+                                Connect(command);
                             }
                             break;
 
                         case "login":
                             if (command.Length > 2)
                             {
-                                messages.Add(new ChatMessage { Id = -1, User = "SYSTEM", Message = $"Trying to log in as {command[1]}" });
-                                var request = new Request { operation = 1, username = command[1], password = command[2] };
-                                username = command[1];
-                                byte[] messageSent = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(request));
-                                int byteSent = connection.Send(messageSent);
+                                Login(command);
                             }
                             break;
                         case "register":
                             if (command.Length > 2)
                             {
-                                messages.Add(new ChatMessage { Id = -1, User = "SYSTEM", Message = $"Trying to register as {command[1]}" });
-                                var request = new Request { operation = 0, username = command[1], password = command[2] };
-                                byte[] messageSent = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(request));
-                                int byteSent = connection.Send(messageSent);
+                                Register(command);
                             }
                             break;
 
@@ -143,6 +138,43 @@ namespace Imageboard
             }
             SendBox.Text= string.Empty;
             
+        }
+
+        private void Register(string[] command)
+        {
+            messages.Add(new ChatMessage { Id = -1, User = "SYSTEM", Message = $"Trying to register as {command[1]}" });
+            var request = new Request { operation = 0, username = command[1], password = command[2] };
+            byte[] messageSent = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(request));
+            int byteSent = connection.Send(messageSent);
+        }
+
+        private void Login(string[] command)
+        {
+            messages.Add(new ChatMessage { Id = -1, User = "SYSTEM", Message = $"Trying to log in as {command[1]}" });
+            var request = new Request { operation = 1, username = command[1], password = command[2] };
+            Username = command[1];
+            byte[] messageSent = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(request));
+            int byteSent = connection.Send(messageSent);
+        }
+
+        private void Connect(string[] command)
+        {
+            messages.Add(new ChatMessage { Id = -1, User = "SYSTEM", Message = $"Connecting to {command[1]}" });
+            string[] host = command[1].Split(':');
+            connection = ExecuteClient(host[0], Convert.ToInt32(host[1]));
+            if (connection != null)
+            {
+                UserTB.Text = $"Host: {host[0]}:{host[1]} \nLog in using /login\nQueue {Queue}/{MaxQueue}";
+                messages.Add(new ChatMessage { Id = -1, User = "SYSTEM", Message = $"Connected to {command[1]}" });
+                messages.Add(new ChatMessage { Id = -1, User = "SYSTEM", Message = $"Login using /login [USERNAME] [PASSWORD]" });
+
+                _ = ReceiveMessagesAsync(connection);
+                _ = SyncMessages(connection);
+            }
+            else
+            {
+                messages.Add(new ChatMessage { Id = -1, User = "SYSTEM", Message = $"Failed to connect to {command[1]}" });
+            }
         }
 
         static Socket ExecuteClient(string IP, int PORT)
@@ -312,9 +344,9 @@ namespace Imageboard
                 string serverContent = selectedServer.IP;
 
 
-                ip = serverContent;
+                Ip = serverContent;
 
-                SendBox.Text = "/connect " + ip;
+                SendBox.Text = "/connect " + Ip;
             }
         }
 

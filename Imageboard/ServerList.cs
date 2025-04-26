@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Imageboard
 {
-    internal class ServerList
+    public class ServerList
     {
         public string IP {  get; set; }
     }
